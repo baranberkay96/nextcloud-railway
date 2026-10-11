@@ -1,0 +1,322 @@
+{
+  "name": "Nextcloud 34 Files and Collaboration",
+  "description": "Your own cloud for files, calendars and contacts, with Redis and cron.",
+  "category": "Storage",
+  "tags": [
+    "nextcloud",
+    "file-sharing",
+    "cloud-storage",
+    "calendar",
+    "contacts",
+    "dropbox-alternative"
+  ],
+  "image": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/nextcloud.svg",
+  "services": {
+    "Nextcloud": {
+      "icon": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/nextcloud.svg",
+      "source": {
+        "repo": "baranberkay96/nextcloud-railway",
+        "rootDirectory": "/services/nextcloud"
+      },
+      "startCommand": null,
+      "healthcheckPath": "/status.php",
+      "healthcheckTimeout": 900,
+      "restartPolicyType": "ALWAYS",
+      "numReplicas": 1,
+      "publicDomain": true,
+      "targetPort": 80,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/var/www/html"
+      },
+      "variables": {
+        "PORT": {
+          "defaultValue": "80",
+          "description": "Apache port (domain and healthcheck).",
+          "required": false
+        },
+        "NEXTCLOUD_ADMIN_USER": {
+          "defaultValue": "admin",
+          "description": "Admin account created on first start.",
+          "required": true
+        },
+        "NEXTCLOUD_ADMIN_PASSWORD": {
+          "defaultValue": "${{secret(24, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Admin password (generated). Used only for the first install; change it later in Personal settings.",
+          "required": true
+        },
+        "NEXTCLOUD_TRUSTED_DOMAINS": {
+          "defaultValue": "${{RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Space-separated domains allowed to reach Nextcloud. Add your custom domain here; re-applied on every start.",
+          "required": true
+        },
+        "POSTGRES_HOST": {
+          "defaultValue": "${{Postgres.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Postgres host (private network).",
+          "required": true
+        },
+        "POSTGRES_DB": {
+          "defaultValue": "${{Postgres.PGDATABASE}}",
+          "description": "Database name.",
+          "required": true
+        },
+        "POSTGRES_USER": {
+          "defaultValue": "${{Postgres.PGUSER}}",
+          "description": "Database user used for installation (Nextcloud creates its own user).",
+          "required": true
+        },
+        "POSTGRES_PASSWORD": {
+          "defaultValue": "${{Postgres.PGPASSWORD}}",
+          "description": "Database password.",
+          "required": true
+        },
+        "REDIS_HOST": {
+          "defaultValue": "${{Redis.RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Redis host for file locking, distributed cache and PHP sessions.",
+          "required": true
+        },
+        "REDIS_HOST_PORT": {
+          "defaultValue": "6379",
+          "description": "Redis port.",
+          "required": false
+        },
+        "REDIS_HOST_PASSWORD": {
+          "defaultValue": "${{Redis.REDIS_PASSWORD}}",
+          "description": "Redis password.",
+          "required": true
+        },
+        "OVERWRITEPROTOCOL": {
+          "defaultValue": "https",
+          "description": "Generate https:// links behind Railway's TLS proxy.",
+          "required": true
+        },
+        "OVERWRITECLIURL": {
+          "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Base URL used in links created by cron/CLI (emails, notifications). Update for a custom domain.",
+          "required": false
+        },
+        "TRUSTED_PROXIES": {
+          "defaultValue": "100.64.0.0/10 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 fd00::/8",
+          "description": "Railway proxy ranges, so Nextcloud sees real client IPs (brute-force protection).",
+          "required": false
+        },
+        "FORWARDED_FOR_HEADERS": {
+          "defaultValue": "HTTP_X_FORWARDED_FOR",
+          "description": "Header holding the client IP.",
+          "required": false
+        },
+        "NEXTCLOUD_INIT_HTACCESS": {
+          "defaultValue": "true",
+          "description": "Refresh .htaccess on start (pretty URLs without index.php).",
+          "required": false
+        },
+        "NEXTCLOUD_PRIMARY_STORAGE": {
+          "defaultValue": "volume",
+          "description": "Where files are stored: 'volume' (service volume, 5 GB on Hobby) or 'bucket' (Railway Bucket, unlimited). Choose before the first deploy; locked after installation.",
+          "required": true
+        },
+        "BUCKET_NAME": {
+          "defaultValue": "${{Bucket.BUCKET}}",
+          "description": "Railway Bucket name (used when NEXTCLOUD_PRIMARY_STORAGE=bucket).",
+          "required": false
+        },
+        "BUCKET_ENDPOINT": {
+          "defaultValue": "${{Bucket.ENDPOINT}}",
+          "description": "Railway Bucket S3 endpoint.",
+          "required": false
+        },
+        "BUCKET_REGION": {
+          "defaultValue": "${{Bucket.REGION}}",
+          "description": "Railway Bucket region.",
+          "required": false
+        },
+        "BUCKET_ACCESS_KEY_ID": {
+          "defaultValue": "${{Bucket.ACCESS_KEY_ID}}",
+          "description": "Railway Bucket access key.",
+          "required": false
+        },
+        "BUCKET_SECRET_ACCESS_KEY": {
+          "defaultValue": "${{Bucket.SECRET_ACCESS_KEY}}",
+          "description": "Railway Bucket secret key.",
+          "required": false
+        },
+        "BUCKET_FORCE_PATH_STYLE": {
+          "defaultValue": "false",
+          "description": "Railway Buckets use virtual-hosted URLs; true only if the Bucket's Credentials tab says path-style.",
+          "required": false
+        },
+        "NEXTCLOUD_INSTALL_APPS": {
+          "defaultValue": "calendar contacts",
+          "description": "App-store apps installed right after the first install (space-separated).",
+          "required": false
+        },
+        "NEXTCLOUD_DEFAULT_PHONE_REGION": {
+          "defaultValue": "",
+          "description": "Optional ISO 3166-1 country code (e.g. DE) for phone numbers without a country prefix.",
+          "required": false
+        },
+        "NEXTCLOUD_MAINTENANCE_WINDOW_START": {
+          "defaultValue": "1",
+          "description": "UTC hour when heavy background jobs may run.",
+          "required": false
+        },
+        "NEXTCLOUD_CRON": {
+          "defaultValue": "true",
+          "description": "Run background jobs with cron inside this container every 5 minutes.",
+          "required": false
+        },
+        "PHP_MEMORY_LIMIT": {
+          "defaultValue": "512M",
+          "description": "PHP memory limit per request.",
+          "required": false
+        },
+        "PHP_UPLOAD_LIMIT": {
+          "defaultValue": "512M",
+          "description": "Max single (non-chunked) upload; browsers and sync clients upload large files in chunks.",
+          "required": false
+        },
+        "APACHE_MAX_REQUEST_WORKERS": {
+          "defaultValue": "16",
+          "description": "Max parallel PHP requests (~60-120 MB each). Raise with more RAM.",
+          "required": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "30",
+          "description": "Time for running requests to finish on redeploy.",
+          "required": false
+        }
+      }
+    },
+    "Postgres": {
+      "icon": "https://devicons.railway.app/i/postgresql.svg",
+      "source": {
+        "image": "ghcr.io/railwayapp-templates/postgres-ssl:18"
+      },
+      "startCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/var/lib/postgresql/data"
+      },
+      "variables": {
+        "PGDATA": {
+          "defaultValue": "/var/lib/postgresql/data/pgdata",
+          "description": "Location where the database will be initialized",
+          "required": true
+        },
+        "PGHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Railway Private Domain Name.",
+          "required": true
+        },
+        "PGPORT": {
+          "defaultValue": "5432",
+          "description": "Port to connect to Postgres.",
+          "required": true
+        },
+        "PGUSER": {
+          "defaultValue": "${{ POSTGRES_USER }}",
+          "description": "Required variable for Data panel",
+          "required": true
+        },
+        "PGDATABASE": {
+          "defaultValue": "${{POSTGRES_DB}}",
+          "description": "Required variable for the data panel.",
+          "required": true
+        },
+        "PGPASSWORD": {
+          "defaultValue": "${{POSTGRES_PASSWORD}}",
+          "description": "Required variable for Data panel",
+          "required": true
+        },
+        "POSTGRES_DB": {
+          "defaultValue": "railway",
+          "description": "Default database created when image is started.",
+          "required": true
+        },
+        "DATABASE_URL": {
+          "defaultValue": "postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:5432/${{PGDATABASE}}",
+          "description": "URL to connect to Postgres (private network).",
+          "required": true
+        },
+        "POSTGRES_USER": {
+          "defaultValue": "postgres",
+          "description": "User to connect to Postgres DB",
+          "required": true
+        },
+        "SSL_CERT_DAYS": {
+          "defaultValue": "820",
+          "description": "SSL certificate expiry in days.",
+          "required": false
+        },
+        "POSTGRES_PASSWORD": {
+          "defaultValue": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}",
+          "description": "Password to connect to DB",
+          "required": true
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "60",
+          "description": "Allow Postgres to cleanly shut down",
+          "required": true
+        }
+      }
+    },
+    "Redis": {
+      "icon": "https://cdn.sanity.io/images/sy1jschh/production/0ce0bfdcfbdbf69662b1116671f97c2dd788b655-157x157.svg",
+      "source": {
+        "image": "redis:8.2"
+      },
+      "startCommand": "/bin/sh -c \"rm -rf $RAILWAY_VOLUME_MOUNT_PATH/lost+found/ && exec docker-entrypoint.sh redis-server --requirepass $REDIS_PASSWORD --save 60 1 --dir $RAILWAY_VOLUME_MOUNT_PATH\"",
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ON_FAILURE",
+      "restartPolicyMaxRetries": 10,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/data"
+      },
+      "variables": {
+        "REDISHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Private network hostname of the Redis service, only resolvable from services in the same environment",
+          "required": true
+        },
+        "REDISPORT": {
+          "defaultValue": "6379",
+          "description": "Port that Redis listens on",
+          "required": true
+        },
+        "REDISUSER": {
+          "defaultValue": "default",
+          "description": "Username for authenticating with Redis",
+          "required": true
+        },
+        "REDIS_URL": {
+          "defaultValue": "redis://${{ REDISUSER }}:${{ REDIS_PASSWORD }}@${{ REDISHOST }}:${{ REDISPORT }}",
+          "description": "Connection string for connecting to Redis using the private network",
+          "required": true
+        },
+        "REDISPASSWORD": {
+          "defaultValue": "${{REDIS_PASSWORD}}",
+          "description": "Alias of REDIS_PASSWORD for clients that expect the unseparated name",
+          "required": true
+        },
+        "REDIS_PASSWORD": {
+          "defaultValue": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}",
+          "description": "Randomly generated password for authenticating with Redis",
+          "required": true
+        }
+      }
+    }
+  },
+  "buckets": [
+    "Bucket"
+  ]
+}

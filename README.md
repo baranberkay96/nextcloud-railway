@@ -1,5 +1,7 @@
 # Deploy and Host Nextcloud with Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/nextcloud-34-files-and-collaboration?referralCode=20H68q)
+
 Nextcloud is an open-source cloud for files, calendars, contacts and collaboration that you run yourself. This community template deploys Nextcloud 34 on Railway with PostgreSQL, Redis for file locking and caching, background jobs on cron, and a choice between volume storage and a Railway Bucket for your files.
 
 ## About Hosting Nextcloud
